@@ -1,7 +1,7 @@
 CardboardEffect.js
 ==================
 
-CardboardEffect.js has been removed from Three.js. 
+CardboardEffect.js has been removed from Three.js.
 
 This is required for pseudo cardboard effects until native WebVR distortion is available for cardboard devices on Android.
 
