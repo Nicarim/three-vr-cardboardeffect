@@ -1,20 +1,27 @@
 /**
+ * Original Cardboard Distortion Effect. This can be used where WebVR is not enabled on devices.
+ * Changes to turn it into a three.js module for bundling.
  * @author mrdoob / http://mrdoob.com/
+ * @author danrossi / https://www.electroteque.org
  */
 
-THREE.CardboardEffect = function ( renderer ) {
 
-	var _camera = new THREE.OrthographicCamera( - 1, 1, 1, - 1, 0, 1 );
 
-	var _scene = new THREE.Scene();
+function CardboardEffect( renderer ) {
 
-	var _stereo = new THREE.StereoCamera();
-	_stereo.aspect = 0.5;
+	this._camera = new THREE.OrthographicCamera( - 1, 1, 1, - 1, 0, 1 );
+
+	this._scene = new THREE.Scene();
+
+	this._stereo = new THREE.StereoCamera();
+	this._stereo.aspect = 0.5;
+
+	this.renderer = renderer;
 
 	var _params = { minFilter: THREE.LinearFilter, magFilter: THREE.NearestFilter, format: THREE.RGBAFormat };
 
-	var _renderTarget = new THREE.WebGLRenderTarget( 512, 512, _params );
-	_renderTarget.scissorTest = true;
+	this._renderTarget = new THREE.WebGLRenderTarget( 512, 512, _params );
+	this._renderTarget.scissorTest = true;
 
 	// Distortion Mesh ported from:
 	// https://github.com/borismus/webvr-boilerplate/blob/master/src/distortion/barrel-distortion-fragment.js
@@ -62,43 +69,46 @@ THREE.CardboardEffect = function ( renderer ) {
 	//
 
 	// var material = new THREE.MeshBasicMaterial( { wireframe: true } );
-	var material = new THREE.MeshBasicMaterial( { map: _renderTarget.texture } );
+	var material = new THREE.MeshBasicMaterial( { map: this._renderTarget.texture } );
 	var mesh = new THREE.Mesh( geometry, material );
-	_scene.add( mesh );
-
-	//
-
-	this.setSize = function ( width, height ) {
-
-		renderer.setSize( width, height );
-
-		var pixelRatio = renderer.getPixelRatio();
-
-		_renderTarget.setSize( width * pixelRatio, height * pixelRatio );
-
-	};
-
-	this.render = function ( scene, camera ) {
-
-		scene.updateMatrixWorld();
-
-		if ( camera.parent === null ) camera.updateMatrixWorld();
-
-		_stereo.update( camera );
-
-		var width = _renderTarget.width / 2;
-		var height = _renderTarget.height;
-
-		_renderTarget.scissor.set( 0, 0, width, height );
-		_renderTarget.viewport.set( 0, 0, width, height );
-		renderer.render( scene, _stereo.cameraL, _renderTarget );
-
-		_renderTarget.scissor.set( width, 0, width, height );
-		_renderTarget.viewport.set( width, 0, width, height );
-		renderer.render( scene, _stereo.cameraR, _renderTarget );
-
-		renderer.render( _scene, _camera );
-
-	};
+	this._scene.add( mesh );
 
 };
+
+CardboardEffect.prototype.setSize = function ( width, height ) {
+
+	this.renderer.setSize( width, height );
+
+	var pixelRatio = this.renderer.getPixelRatio();
+
+	this._renderTarget.setSize( width * pixelRatio, height * pixelRatio );
+
+};
+
+CardboardEffect.prototype.render = function ( scene, camera ) {
+
+	scene.updateMatrixWorld();
+
+	if ( camera.parent === null ) camera.updateMatrixWorld();
+
+	this._stereo.update( camera );
+
+	var width = this._renderTarget.width / 2;
+	var height = this._renderTarget.height;
+
+	this._renderTarget.scissor.set( 0, 0, width, height );
+	this._renderTarget.viewport.set( 0, 0, width, height );
+	this.renderer.render( scene, this._stereo.cameraL, this._renderTarget );
+
+	this._renderTarget.scissor.set( width, 0, width, height );
+	this._renderTarget.viewport.set( width, 0, width, height );
+	this.renderer.render( scene, this._stereo.cameraR, this._renderTarget );
+
+	this.renderer.render( this._scene, this._camera );
+
+};
+
+
+CardboardEffect.prototype.constructor = CardboardEffect;
+
+export { CardboardEffect };
