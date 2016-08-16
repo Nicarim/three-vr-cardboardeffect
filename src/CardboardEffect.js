@@ -111,4 +111,4 @@ CardboardEffect.prototype.render = function ( scene, camera ) {
 
 CardboardEffect.prototype.constructor = CardboardEffect;
 
-export { CardboardEffect };
+// export { CardboardEffect };
